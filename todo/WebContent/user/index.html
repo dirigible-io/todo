@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en" ng-app>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Todo List</title>
+
+   <link rel="stylesheet"  href="../../../components/bootstrap/dist/css/bootstrap.min.css">
+     <script 
+        src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.14/angular.min.js">
+     </script>
+</head>
+
+<body>
+<div class="container" ng-controller="TodoController">
+    
+    <div class="navbar navbar-default" role="navigation">
+          <a class="navbar-brand bid-brand" href="#">Todo List</a>
+          <ul class="nav navbar-nav navbar-right hidden-xs">
+            <li>
+              <a>Logged in: {{ loggedInUser }}</a>
+            </li>
+          </ul>
+    </div>
+        
+    <div class="panel panel-default">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th  ng-repeat="column in columns">{{ column.display }} </th>
+                        <th
+                            <button title="Click to remove completed tasks" ng-disabled="!notEmpty" ng-click="archive()" type="button" class="btn btn-default">
+                                <span class="glyphicon glyphicon-trash"></span>archive
+                            </button>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="{{ item.styleClass }}" ng-repeat="item in items track by $index">
+                        <td>{{ item.todo }}</td>
+                        <td>{{ item.priority }}</td>
+                        <td>
+                              <input ng-click="updateTodo(item)" type="checkbox" ng-model="item.status">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <td>
+                            <input class="form-control" type="text" ng-model="todoText"  size="100" placeholder="add new todo here">
+                        </td>
+                        <td>
+                          <select class="form-control" ng-model="priority" ng-options="pr for pr in priorities"></select><br>
+                        </td>
+                        <td> 
+                            <button title="Click to add a new task" ng-disabled="!todoText" ng-click="addTodo(todoText, priority)"type="button" class="btn btn-default">
+                                <span class="glyphicon glyphicon-plus"></span>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="panel panel-default">
+        <div class="panel-heading">Overall completion</div>
+        <div class="panel-body">
+            <div > Overall: {{ done }} / {{ all }}</div>
+            <div class="progress">
+            <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ coverage }}%;">
+               {{ coverage }} % complete
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">Priority completion</div>
+      <div class="panel-body">
+             <div >  Minor    : {{ minorsDone }}    / {{ minors }}</div>
+        <div class="progress">
+            <div class="progress-bar" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: {{ minorsCoverage }}%">
+                {{ minorsCoverage }} % complete
+            </div>
+        </div>
+        <div >  Standard : {{ standardsDone }} / {{ standards }}</div>
+        <div class="progress">
+            <div class="progress-bar" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: {{ standardsCoverage }}%">
+                {{ standardsCoverage }} % complete
+            </div>
+        </div>
+        <div >  Major    : {{ majorsDone }}    / {{ majors }}</div>
+        <div class="progress">
+          <div class="progress-bar" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: {{ majorsCoverage }}%">
+            {{ majorsCoverage }} % complete
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+  function TodoController($scope, $http){
+    var todoUrl = "/dirigible/js-secured/todo/user/todo.js";
+    var userUrl = "/dirigible/js-secured/todo/user/todo.js?userInfoParam=true";
+    
+    $scope.done = 0;
+    $scope.coverage = 100;
+    
+    $scope.majors = 0;
+    $scope.majorsDone = 0;
+    $scope.majorsCoverage = undefined;
+     
+    $scope.standards = 0;
+    $scope.standardsDone = 0;
+    $scope.standardsCoverage = undefined;
+    
+    $scope.minors = 0;
+    $scope.minorsDone = 0;
+    $scope.minorsCoverage = undefined;
+    
+    $scope.columns = [
+        {
+            name: 'todo',
+            display: 'Task'
+        }, 
+        {
+            name: 'priority',
+            display: 'Priority'
+        },
+        {
+            name: 'status',
+            display: 'Status'
+        }
+    ];
+    
+    $scope.priorities = [
+        "Minor", "Standard", "Major"
+    ];
+    $scope.priority = $scope.priorities[0]; 
+    
+    
+    
+    refreshData();
+    getUserData();
+     
+    function refreshData(){
+        $http.get(todoUrl)
+            .success(function(data){
+                $scope.items = data;
+                $scope.completed = [];
+                $scope.all  = data.length;
+                
+                for(var i = 0; i < data.length ; i ++){
+                    
+                    if(data[i].priority == "Major"){
+                        $scope.majors++;
+                       
+                        if(data[i].status == true){
+                            $scope.majorsDone++;
+                            data[i].styleClass = "alert-success";
+                            $scope.completed.push(data[i]);
+                        }
+                    }
+                    
+                    if(data[i].priority == "Standard"){
+                        $scope.standards++;
+                         
+                        if(data[i].status == true){
+                            $scope.standardsDone++;
+                            data[i].styleClass = "alert-success";
+                            $scope.completed.push(data[i]);
+                        } 
+                    }
+                    
+                    if(data[i].priority == "Minor"){
+                        $scope.minors++;
+                        if(data[i].status == true){
+                            $scope.minorsDone++;
+                            data[i].styleClass = "alert-success";
+                            $scope.completed.push(data[i]);
+                        }
+                    }
+                }
+                
+                if($scope.majors == 0){
+                    $scope.majorsCoverage = 0;
+                } else {
+                    $scope.majorsCoverage = $scope.majorsDone/$scope.majors*100;
+                }
+                
+                if($scope.majors == 0){
+                    $scope.majorsCoverage = 0;
+                } else {
+                    $scope.majorsCoverage = $scope.majorsDone/$scope.majors*100;
+                }
+                
+                if($scope.minors == 0){
+                    $scope.minorsCoverage = 0;
+                } else {
+                    $scope.minorsCoverage = $scope.minorsDone/$scope.minors*100;
+                }
+                
+                if($scope.standards == 0){
+                    $scope.standardsCoverage = 0;
+                } else {
+                    $scope.standardsCoverage = $scope.standardsDone/$scope.standards*100;
+                }
+                
+                $scope.done = $scope.majorsDone + $scope.minorsDone + $scope.standardsDone;
+                if($scope.all == 0){
+                     $scope.coverage = 0;
+                } else {
+                    $scope.coverage = $scope.done/$scope.all*100;
+                }
+                
+                if($scope.completed.length > 0){
+                    $scope.notEmpty = true;
+                } else {
+                    $scope.notEmpty = false;
+                }    
+            })
+            .error(function(data){
+                
+            });
+    }
+    function reset(){
+        $scope.all = 0;
+        $scope.done = 0;
+        $scope.coverage = undefined;
+        
+        $scope.majors = 0;
+        $scope.majorsDone = 0;
+        $scope.majorsCoverage = undefined;
+         
+        $scope.standards = 0;
+        $scope.standardsDone = 0;
+        $scope.standardsCoverage = undefined;
+        
+        $scope.minors = 0;
+        $scope.minorsDone = 0;
+        $scope.minorsCoverage = undefined;
+    }
+    
+    $scope.addTodo = function(todoText, priority){
+        var entity = {};
+        entity.todo = todoText;
+        entity.priority = priority;
+        
+        $http.post(todoUrl, entity)
+            .success(function(){
+                reset();
+                refreshData();
+            })
+            .error(function(response){
+                
+            });
+    }
+    
+    $scope.updateTodo = function(item){
+        var entity    = {};
+        entity.id     = item.id;
+        
+        var value = !item.status;
+        if(value){
+            entity.status = 1;
+        } else {
+            entity.status = 0;
+        }
+        $http.put(todoUrl, entity)
+            .success(function(){
+                reset();
+                refreshData();
+            })
+            .error(function(response){
+                
+            });
+    }
+    
+    $scope.archive = function(){
+            $http.delete(todoUrl)
+                .success(function(){
+                    reset();
+                    refreshData();
+                })
+                .error(function(response){
+                    
+                });
+    }
+    
+    function getUserData(){
+        $http.get(userUrl)
+            .success(function(data){
+                
+                for(var i = 0; i < data.length ; i++){
+                        $scope.loggedInUser = data[i].loggedInUser;
+                    }
+            })
+            .error(function(response){
+                    
+            });
+    }
+    
+}
+</script>
+ </body>
+</html>

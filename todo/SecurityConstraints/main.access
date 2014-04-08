@@ -1,0 +1,11 @@
+[
+  {
+    "location":"/todo/user",
+    "roles":
+      [
+        {"role":"User"},
+        {"role":"Everyone"}
+      ]
+  }
+]
+
