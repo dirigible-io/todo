@@ -9,10 +9,7 @@
 
   <title>Todo List</title>
 
-   <link rel="stylesheet"  href="../../../components/bootstrap/dist/css/bootstrap.min.css">
-     <script 
-        src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.14/angular.min.js">
-     </script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -108,10 +105,13 @@
     </div>
   </div>
   
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.2/angular.min.js"></script>
+    
   <script>
   function TodoController($scope, $http){
-    var todoUrl = "/dirigible/js-secured/todo/user/todo.js";
-    var userUrl = "/dirigible/js-secured/todo/user/todo.js?userInfoParam=true";
+    var todoUrl = "/dirigible/services/js-secured/todo/user/todo.js";
+    var userUrl = "/dirigible/services/js-secured/todo/user/todo.js?userInfoParam=true";
     
     $scope.done = 0;
     $scope.coverage = 100;

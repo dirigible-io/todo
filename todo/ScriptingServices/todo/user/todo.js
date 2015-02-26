@@ -100,7 +100,7 @@ function createT_todo() {
         var sql = "INSERT INTO TODO (";
         sql += "ID";
         sql += ",";
-        sql += "USER";
+        sql += "TODO_USER";
         sql += ",";
         sql += "TODO";
         sql += ",";
@@ -170,7 +170,7 @@ function readT_todoList() {
     var connection = datasource.getConnection();
     try {
         var result = [];
-        var sql = "SELECT * FROM TODO WHERE USER = ?";
+        var sql = "SELECT * FROM TODO WHERE TODO_USER = ?";
         
         if (limit !== null && offset !== null) {
             sql += " " + db.createTopAndStart(limit, offset);
@@ -218,7 +218,7 @@ function getUserInfo(){
 function createEntity(resultSet, data) {
     var result = {};
 	result.id = resultSet.getInt("ID");
-    result.user = resultSet.getString("USER");
+    result.user = resultSet.getString("TODO_USER");
     result.todo = resultSet.getString("TODO");
     result.priority = resultSet.getString("PRIORITY");
     result.status = resultSet.getInt("STATUS") == 1;
@@ -301,7 +301,7 @@ function metadataT_todo() {
     entityMetadata.properties.push(propertyid);
 
 	var propertyuser = {};
-	propertyuser.name = 'user';
+	propertyuser.name = 'todo_user';
     propertyuser.type = 'string';
     entityMetadata.properties.push(propertyuser);
 
